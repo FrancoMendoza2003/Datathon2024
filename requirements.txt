@@ -1,0 +1,4 @@
+pandas==2.2.2
+numpy==1.26.4
+fastparquet==2024.2.0
+pyarrow==16.0.0
