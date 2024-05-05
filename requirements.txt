@@ -9,3 +9,7 @@ matplotlib==3.8.4
 xgboost==2.0.3
 scikit-learn==1.4.2
 shap==0.45.0
+
+# --- st ---
+streamlit==1.33.0
+streamlit-authenticator==0.3.2
