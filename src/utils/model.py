@@ -203,6 +203,4 @@ def prepare_variables(variables: dict) -> pd.DataFrame:
         ]
     ]
 
-    variables_.to_csv("test_.csv", index=False)
-
     return variables_
