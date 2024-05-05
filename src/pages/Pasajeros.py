@@ -106,8 +106,6 @@ with st.form("pasajeros"):
 
             variables = prepare_variables(data)
 
-            variables.to_csv("test_.csv", index=False)
-
             prediction = st.session_state["model_pasajeros"].predict(variables)
 
             st.success(
