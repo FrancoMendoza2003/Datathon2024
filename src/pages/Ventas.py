@@ -25,8 +25,8 @@ from utils.model import prepare_variables_product, prepare_variables
 
 # Se cargan los modelos cargados en el archivo
 for model_name in modelos_nombres:
-    if f"model_{model_name}" not in st.session_state:
-        st.session_state[f"model_{model_name}"] = pickle.load(
+    if f"{model_name}" not in st.session_state:
+        st.session_state[f"{model_name}"] = pickle.load(
             open(
                 f"../prediction/productos/renamed/{model_name}.pkl",
                 "rb",
@@ -157,12 +157,9 @@ with st.form("productos"):
             print(f"{data=}")
 
             predictions = {}
-
-            models = [
-                st.session_state[f"model_{model_name}"]
-                for model_name in modelos_nombres
-            ]
-            for i, model in enumerate(models):
+            for model_name in modelos_nombres:
+                i = product_index[model_name.removeprefix("Modelo-")]
+                model = st.session_state[f"{model_name}"]
                 variables = prepare_variables_product(data, model, i)
                 try:
                     predictions[index_product[i]] = math.ceil(
@@ -174,11 +171,10 @@ with st.form("productos"):
 
             format_str = ""
             for key, value in predictions.items():
-                value = max(0, value - 2)
-                if value == 0:
+                if value <= 0:
                     continue
 
                 format_str += f"* {key}: {value}\n\n"
             st.success(
-                f"Predicciones realizadas con éxito\n_________________________\n{format_str}"
+                f"Productos a llevar a bordo en este viaje\n_________________________\n{format_str}"
             )
