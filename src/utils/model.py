@@ -48,8 +48,6 @@ def prepare_variables(variables: dict) -> pd.DataFrame:
     #         for col in variables_encoded.columns:
     #             variables_[f"{prefix}_{'_'.join(col.strip().lower().split())}"] = variables_encoded[col]
 
-    #         for
-
     # variables_ = one_hot_encode(variables_, column=col, prefix=prefix)
     # fmt: on
 
