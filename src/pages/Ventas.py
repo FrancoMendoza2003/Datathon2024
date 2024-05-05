@@ -170,7 +170,7 @@ with st.form("productos"):
                     print("ERROR DE INFERENCIA")
                     continue
 
-            with open("prediction_2.json", "w") as json_file:
+            with open("prediction_1.json", "w") as json_file:
                 json.dump(predictions, json_file)
 
             format_str = ""
