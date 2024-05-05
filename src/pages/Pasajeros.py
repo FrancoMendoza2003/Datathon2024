@@ -23,6 +23,14 @@ if "model_pasajeros" not in st.session_state:
             "rb",
         )
     )
+if "model_booking" not in st.session_state:
+   
+    st.session_state["model_booking"] = pickle.load(
+        open(
+            "../prediction/pasajeros/models/xgb_bookings_model.pickle",
+            "rb",
+        )
+    )
 
 
 st.title("Pasajeros en VivaAerobus")
@@ -107,7 +115,8 @@ with st.form("pasajeros"):
             variables = prepare_variables(data)
 
             prediction = st.session_state["model_pasajeros"].predict(variables)
+            prediction2 = st.session_state["model_booking"].predict(variables)
 
             st.success(
-                f"Se espera un volumen de {min(math.floor(prediction), capacidad)} pasajeros"
+                f"Se espera un volumen de {min(math.floor(prediction), capacidad)} pasajeros, con un booking de {min(math.floor(prediction2), capacidad)}"
             )
