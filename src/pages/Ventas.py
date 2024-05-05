@@ -8,6 +8,7 @@ with open("data/productos.json") as f:
     categorias = data["categorias_unicas"]
     product_index = data["product_index"]
     index_product = {v: k for k, v in product_index.items()}
+    product_names = data["productos_nombres"]
 
 with open("data/vuelos.json") as f:
     data = json.load(f)
@@ -169,12 +170,15 @@ with st.form("productos"):
                     print("ERROR DE INFERENCIA")
                     continue
 
+            with open("prediction_1.json", "w") as json_file:
+                json.dump(predictions, json_file)
+
             format_str = ""
             for key, value in predictions.items():
                 if value <= 0:
                     continue
 
-                format_str += f"* {key}: {value}\n\n"
+                format_str += f"* {product_names[key]}: {value}\n\n"
             st.success(
                 f"Productos a llevar a bordo en este viaje\n_________________________\n{format_str}"
             )
