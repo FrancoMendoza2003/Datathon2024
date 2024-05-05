@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import numpy as np
+from xgboost import XGBRegressor
 
 with open("data/vuelos.json") as f:
     data = json.load(f)
@@ -8,6 +9,12 @@ with open("data/vuelos.json") as f:
     tipo_lugares_opciones = data["tipo_lugares"]
     origenes_opciones = data["origenes"]
     destinos_opciones = data["destinos"]
+
+with open("data/productos.json") as f:
+    data = json.load(f)
+    modelos_nombres = [f"Modelo-{producto}" for producto in data["productos"]]
+    categorias_productos = data["categorias"]
+    categorias = data["categorias_unicas"]
 
 
 def one_hot_encode(
@@ -200,5 +207,93 @@ def prepare_variables(variables: dict) -> pd.DataFrame:
             "VacacionesEscolares",
         ]
     ]
+
+    return variables_
+
+
+def prepare_variables_product(
+    variables: dict,
+    model: XGBRegressor,
+    index: int,
+) -> pd.DataFrame:
+    variables_ = pd.DataFrame(variables)
+
+    # fmt: off
+    for val in list(set(tipo_lugares_opciones.values())):
+        variables_[f"origen_{''.join(val.strip().lower().split())}"] = np.where(variables_["Origin_Type"] == val, 1, 0) 
+        
+    for val in list(set(tipo_lugares_opciones.values())):
+        variables_[f"destino_{''.join(val.strip().lower().split())}"] = np.where(variables_["Destination_Type"] == val, 1, 0) 
+
+    for val in origenes_opciones:
+        variables_[f"arrival_{'_'.join(val.strip().split())}"] = np.where(variables_["ArrivalStation"] == val, 1, 0) 
+        
+    for val in destinos_opciones:
+        variables_[f"departure_{'_'.join(val.strip().split())}"] = np.where(variables_["DepartureStation"] == val, 1, 0) 
+
+    variables_ = variables_.drop(columns=["DepartureStation", "ArrivalStation", "Destination_Type", "Origin_Type"])
+
+    # for col, prefix in zip([ "DepartureStation", "ArrivalStation", "Destination_Type", "Origin_Type"], [ "departure", "arrival", "destino", "origen"]):
+    #         variables_encoded = pd.get_dummies(variables_[col], dtype="int")
+    #         for col in variables_encoded.columns:
+    #             variables_[f"{prefix}_{'_'.join(col.strip().lower().split())}"] = variables_encoded[col]
+
+    # variables_ = one_hot_encode(variables_, column=col, prefix=prefix)
+    # fmt: on
+
+    variables_["Dia"] = variables_["STD"].dt.day_of_year
+    # fmt: off
+    # variables_["STD"] = pd.to_datetime(variables_["STD"])
+    # variables_["STA"] = pd.to_datetime(variables_["STA"])
+    variables_["Mes"] = variables_["STD"].dt.month
+    variables_["Semana"] = variables_["STD"].dt.isocalendar().week
+    variables_["DiaSemana"] = variables_["STD"].dt.weekday + 1
+    variables_["Hora"] = variables_["STD"].dt.hour
+    variables_["Duracion"] = (variables_["STA"] - variables_["STD"]).dt.total_seconds() / 60
+    # fmt: on
+
+    variables_ = variables_.drop(columns=["STD"])
+
+    dias_feriado = [
+        1,  # Año Nuevo
+        36,
+        78,
+        122,
+        136,
+        260,
+        323,
+        360,
+        365,  # Año Nuevo
+    ]
+
+    variables_["DiasAFeriadoCercano"] = variables_["Dia"].apply(
+        lambda x: min([abs(x - feriado) for feriado in dias_feriado])
+    )
+
+    # # Dias entre 15 de julio y 28 de agosto
+    # vacaciones_verano = (variables_["Dia"] >= 197) & (variables_["Dia"] <= 241)
+    # # Dias entre 18 de diciembre y 5 de enero
+    # vacaciones_invierno = (variables_["Dia"] >= 353) & (variables_["Dia"] <= 5)
+    # # Dias entre 25 de marzo y 5 de abril
+    # vacaciones_diatrabajo = (variables_["Dia"] >= 85) & (variables_["Dia"] <= 96)
+
+    # variables_["VacacionesEscolares"] = np.where(
+    #     (vacaciones_verano) | (vacaciones_invierno) | (vacaciones_diatrabajo),
+    #     1,
+    #     0,
+    # )
+
+    variables_["ProductName"] = index
+
+    variables_ = variables_.rename(
+        columns={
+            "destino_mxamigosyfamilia": "destino_amigosfamilia",
+            "origen_mxamigosyfamilia": "origen_amigosfamilia",
+        }
+    )
+
+    variables_ = variables_[model.get_booster().feature_names]
+
+    print(f" ==== {variables_.to_records()=}")
 
     return variables_
