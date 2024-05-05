@@ -22,4 +22,9 @@ Consideraciones
 Para poder realizar la inferencia del modelo creado de pasajeros:
 
 - Ir al directerio `prediction/pasajeros/`
-- Introducir las variables de entrada en el notebook `01-variables.ipynb` para 
+- Introducir las variables de entrada en el notebook `01-variables.ipynb` para
+
+
+## Cosas finales
+- Agregar métricas de accuarcy a modelo predictor de pasajeros
+- Crear modelo predictor de booking
