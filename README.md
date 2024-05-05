@@ -75,4 +75,8 @@ si salen vavciós
 
 eliminar productos intangibles y combos/speciales
 
+## Cosas finales
+- Agregar métricas de accuarcy a modelo predictor de pasajeros
+- Crear modelo predictor de booking
+
 Se pueden hasta 24 sandwiches por vuelo (24 productos perecederos)
